@@ -61,6 +61,7 @@ class Register extends React.Component {
     if (this.isFormValid()) {
       this.setState({ errors: [], loading: true });
 
+      // https://firebase.google.com/docs/auth/web/start?authuser=0#sign_up_new_users
       firebase
         .auth()
         .createUserWithEmailAndPassword(this.state.email, this.state.password)

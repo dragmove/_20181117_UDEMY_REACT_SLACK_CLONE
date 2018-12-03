@@ -4,7 +4,8 @@ import 'firebase/database';
 import 'firebase/storage';
 
 // Initialize Firebase
-var config = {
+// https://firebase.google.com/docs/web/setup?authuser=0#add_firebase_to_your_app
+const config = {
   apiKey: 'AIzaSyA6b8QIKvLWzj5lL4qxXeDJXxmrEF3YVXE',
   authDomain: 'react-slack-clone-b9b56.firebaseapp.com',
   databaseURL: 'https://react-slack-clone-b9b56.firebaseio.com',
@@ -12,6 +13,7 @@ var config = {
   storageBucket: 'react-slack-clone-b9b56.appspot.com',
   messagingSenderId: '50589806413'
 };
+
 firebase.initializeApp(config);
 
 export default firebase;

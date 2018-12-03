@@ -3,21 +3,68 @@ import ReactDOM from 'react-dom';
 import App from './components/App';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
+import Spinner from './Spinner';
 import registerServiceWorker from './registerServiceWorker';
+import firebase from './firebase';
 
 import 'semantic-ui-css/semantic.min.css';
 
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, withRouter } from 'react-router-dom';
 
-const Root = () => (
-  <Router>
-    <Switch>
-      <Route exact path="/" component={App} />
-      <Route path="/login" component={Login} />
-      <Route path="/register" component={Register} />
-    </Switch>
-  </Router>
+import { createStore } from 'redux';
+import { Provider, connect } from 'react-redux';
+import { composeWithDevTools } from 'redux-devtools-extension';
+import rootReducer from './reducers';
+import { setUser } from './actions';
+
+const store = createStore(rootReducer, composeWithDevTools());
+
+class Root extends React.Component {
+  componentDidMount() {
+    console.log('this.props.isLoading :', this.props.isLoading);
+
+    // https://firebase.google.com/docs/auth/web/start?authuser=0#set_an_authentication_state_observer_and_get_user_data
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        console.log('user :', user);
+        // TODO: setUser(user);
+
+        this.props.setUser(user);
+        this.props.history.push('/');
+      }
+    });
+  }
+
+  render() {
+    return this.props.isLoading ? (
+      <Spinner />
+    ) : (
+      <Switch>
+        <Route exact path="/" component={App} />
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
+      </Switch>
+    );
+  }
+}
+
+const mapStateFromProps = state => ({
+  isLoading: state.user.isLoading
+});
+
+const RootWithRouter = withRouter(
+  connect(
+    mapStateFromProps,
+    { setUser }
+  )(Root)
 );
 
-ReactDOM.render(<Root />, document.getElementById('root'));
+ReactDOM.render(
+  <Provider store={store}>
+    <Router>
+      <RootWithRouter />
+    </Router>
+  </Provider>,
+  document.getElementById('root')
+);
 registerServiceWorker();
