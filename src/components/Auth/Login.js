@@ -24,8 +24,8 @@ class Login extends React.Component {
     if (this.isFormValid(this.state)) {
       this.setState({ errors: [], loading: true });
 
-      //firebase.google.com/docs/auth/web/start?authuser=0#sign_in_existing_users
-      https: firebase
+      // https://firebase.google.com/docs/auth/web/start?authuser=0#sign_in_existing_users
+      firebase
         .auth()
         .signInWithEmailAndPassword(this.state.email, this.state.password)
         .then(signedInUser => {
