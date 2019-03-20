@@ -12,15 +12,25 @@ class Channels extends React.Component {
     modal: false
   };
 
+  componentDidMount() {
+    this.addListeners();
+  }
+
+  addListeners = () => {
+    let loadedChannels = [];
+    this.state.channelsRef.on("child_added", snap => {
+      loadedChannels.push(snap.val());
+      this.setState({ channels: loadedChannels });
+    });
+  };
+
   addChannel = () => {
     const { channelsRef, channelName, channelDetails, user } = this.state;
 
     const key = channelsRef.push().key;
 
-    console.log("user :", user);
-
     const newChannel = {
-      key: key,
+      id: key,
       name: channelName,
       details: channelDetails,
       createdBy: {
@@ -33,13 +43,12 @@ class Channels extends React.Component {
       .child(key)
       .update(newChannel)
       .then(() => {
-        this.state.channelName = "";
-        this.state.channelDetails = "";
-
+        this.setState({ channelName: "", channelDetails: "" });
         this.closeModal();
+        console.log("channel added");
       })
-      .catch(error => {
-        console.error(error);
+      .catch(err => {
+        console.error(err);
       });
   };
 
@@ -51,21 +60,28 @@ class Channels extends React.Component {
   };
 
   handleChange = event => {
-    this.setState({
-      [event.target.name]: event.target.value
-    });
+    this.setState({ [event.target.name]: event.target.value });
   };
+
+  displayChannels = channels =>
+    channels.length > 0 &&
+    channels.map(channel => (
+      <Menu.Item
+        key={channel.id}
+        onClick={() => console.log(channel)}
+        name={channel.name}
+        style={{ opacity: 0.7 }}
+      >
+        # {channel.name}
+      </Menu.Item>
+    ));
 
   isFormValid = ({ channelName, channelDetails }) =>
     channelName && channelDetails;
 
-  openModal = () => {
-    this.setState({ modal: true });
-  };
+  openModal = () => this.setState({ modal: true });
 
-  closeModal = () => {
-    this.setState({ modal: false });
-  };
+  closeModal = () => this.setState({ modal: false });
 
   render() {
     const { channels, modal } = this.state;
@@ -79,8 +95,7 @@ class Channels extends React.Component {
             </span>{" "}
             ({channels.length}) <Icon name="add" onClick={this.openModal} />
           </Menu.Item>
-
-          {/* channels */}
+          {this.displayChannels(channels)}
         </Menu.Menu>
 
         {/* Add Channel Modal */}
@@ -112,7 +127,6 @@ class Channels extends React.Component {
             <Button color="green" inverted onClick={this.handleSubmit}>
               <Icon name="checkmark" /> Add
             </Button>
-
             <Button color="red" inverted onClick={this.closeModal}>
               <Icon name="remove" /> Cancel
             </Button>
